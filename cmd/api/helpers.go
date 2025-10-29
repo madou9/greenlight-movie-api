@@ -49,4 +49,6 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data interf
 	w.WriteHeader(status)
 	w.Write(js)
 
+	return nil
+
 }
