@@ -26,7 +26,8 @@ func(app *application) createMovieHandler(w http.ResponseWriter, r *http.Request
 	// Bad Request status code, just like before.
 	err := app.readJSON(w, r, &input)
 	if err != nil {
-		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		// Use the new badRequestResponse() helper.
+		app.badRequestResponse(w, r, err)
 		return
 	}
 
