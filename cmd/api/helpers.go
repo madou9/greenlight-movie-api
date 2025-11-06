@@ -65,9 +65,9 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	err := json.NewDecoder(r.Body).Decode(dst)
 	if err != nil {
 		// if there is an error during decoding, start the triage...
-		var syntaxError *json.SyntaxError
-		var unmarshalTypeError *json.UnmarshalTypeError
-		var invalidUnmarshalError *json.InvalidUnmarshalError
+		var syntaxError *json.SyntaxError // There is a syntax problem with the JSON being decoded.
+		var unmarshalTypeError *json.UnmarshalTypeError // A JSON value is not appropriate for the destination Go type.
+		var invalidUnmarshalError *json.InvalidUnmarshalError // This is actually a problem with our application code, not the JSON itself.
 
 		switch {
 			// Use the errors.As() function to check whether the error has the type
