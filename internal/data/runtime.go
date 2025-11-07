@@ -42,14 +42,11 @@ func (r *Runtime) UnmarshalJSON(jsonValue []byte) error {
 	// double-quotes from this string. If we can't unquote it, then we return the
 	// ErrInvalidRuntimeFormat error.
 	unquotedJSONValue, err := strconv.Unquote(string(jsonValue)) 
-	fmt.Println("unquotedJSONValue: ", unquotedJSONValue)
 	if err != nil {
 		return ErrInvalidRuntimeFormat
 	}
 	// Split the string to isolate the part containing the number.
 	parts := strings.Split(unquotedJSONValue, " ")
-	fmt.Println("parts: ", parts)
-	fmt.Println("parts[0]: ", parts[0])
 
 	// Sanity check the parts of the string to make sure it was in the expected format.
 	// If it isn't, we return the ErrInvalidRuntimeFormat error again.
