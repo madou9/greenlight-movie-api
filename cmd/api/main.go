@@ -16,6 +16,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/madou9/greenlight-movie-api.git/internal/data"
 )
 
 // Declare a string containing the application version number. Later in the book we'll
@@ -50,6 +51,7 @@ type config struct {
 type application struct {
 	config	config
 	logger	*log.Logger
+	models data.Models
 }
 func main() {
 	   // Load .env file
@@ -99,10 +101,12 @@ func main() {
 
 	// Declare an instance of the application struct, containing the config struct and 
 	// the logger.
-
+	// Use the data.NewModels() function to initialize a Models struct, passing in the
+	// connection pool as a parameter.
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModel(db),
 	}
 
 	// Use the httprouter instance returned by app.routes() as the server handler.
