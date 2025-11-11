@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/madou9/greenlight-movie-api.git/internal/validator"
@@ -17,6 +18,33 @@ type Movie struct {
 	Genres		[]string 	`json:"genres,omitempty"` 	// Slice of genres for the movie (romance, comedy, etc.)
 	Version		int32  		`json:"version"` 			// time the movie information is updated
 }
+
+
+// Define a MovieModel struct type which wraps a sql.DB connection pool.
+type MovieModel struct {
+	DB *sql.DB
+}
+
+// Add a placeholder method for inserting a new record in the movies table.
+func (m MovieModel) Insert(movie *Movie) error {
+	return nil
+}
+
+// Add a placeholder method for fetching a specific record from the movies table.
+func (m MovieModel) Get(id int64) (*Movie, error) {
+	return nil, nil
+}
+
+// Add a placeholder method for updating a specific record in the movies table.
+func (m MovieModel) Update(movie *Movie) error {
+	return nil
+}
+
+// Add a placeholder method for deleting a specific record from the movies table.
+func (m MovieModel) Delete(id int64) error {
+	return nil
+}
+
 
 // Use the Check() method to execute our validation checks. This will add the
 // provided key and error message to the errors map if the check does not evaluate
