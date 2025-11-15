@@ -82,7 +82,3 @@ curl -d "$BODY" \
 Learning and built by **Hama Issoufou**
 
 ---
-
-```
-
-```
