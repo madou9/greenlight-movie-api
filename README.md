@@ -46,8 +46,38 @@ This repo is not just the final code — it documents my learning journey:
 
 ---
 
+## ⚙️ Running the Project Locally
+
+### 2. Start PostgreSQL Locally
+
+You must have **PostgreSQL installed** on your machine.
+
+#### **Create the database:**
+
+```bash
+createdb greenlight
+
+migrate -path ./migrations -database "postgres://localhost/greenlight?sslmode=disable" up
+
+export GREENLIGHT_DB_DSN="postgres://YOURUSER@localhost/greenlight?sslmode=disable"
+export GREENLIGHT_PORT=4000
+
+---
+### run the API
+    - go run ./cmd/api/
+
+### TEST Request
+
+BODY='{"title":"Deadpool","year":2016,"runtime":"108 mins","genres":["action","comedy"]}'
+
+curl -d "$BODY" \
+     -H "Content-Type: application/json" \
+     localhost:4000/v1/movies
+
+
 ## 👤 Author
 
 Learning and built by **Hama Issoufou**
 
 ---
+```
