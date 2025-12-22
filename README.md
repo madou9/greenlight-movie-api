@@ -1,84 +1,178 @@
-# Greenlight — Movie API in Go
+# Greenlight — Movie API
 
-Greenlight is a JSON API for retrieving and managing movie information, built in Go with a focus on clean architecture, performance, and production-ready practices.
+A small RESTful API written in Go to manage movies and users. Built with httprouter and a simple data layer. This README describes setup, running, available endpoints, and examples.
 
-The API exposes endpoints for movies, users, authentication tokens, and application health/metrics. PostgreSQL is used for persistent storage, and the service is intended to be deployed on a Linux server environment.
+## Features
 
----
+- CRUD for movies (create, list, show, update, delete)
+- User registration endpoint
+- JSON request/response handling and validation
+- Clean project structure with `cmd/api`, `internal/data`, and helper packages
 
-## 🚀 Planned Features (End Goals)
+## Tech stack
 
-| Method | Route                     | Description                       |
-| ------ | ------------------------- | --------------------------------- |
-| GET    | /v1/healthcheck           | Show application status & version |
-| GET    | /v1/movies                | List all movies                   |
-| POST   | /v1/movies                | Create a new movie                |
-| GET    | /v1/movies/:id            | Get a specific movie              |
-| PATCH  | /v1/movies/:id            | Update a specific movie           |
-| DELETE | /v1/movies/:id            | Delete a movie                    |
-| POST   | /v1/users                 | Register a user                   |
-| PUT    | /v1/users/activated       | Activate a user                   |
-| PUT    | /v1/users/password        | Change a user's password          |
-| POST   | /v1/tokens/authentication | Generate auth token               |
-| POST   | /v1/tokens/password-reset | Generate password reset token     |
-| GET    | /debug/vars               | Show metrics                      |
+- Go (1.20+)
+- PostgreSQL
+- httprouter
+- Standard library + small helper packages (validator, custom JSON helpers)
 
-The API will use **PostgreSQL** for persistent storage and will eventually be deployed on a Linux server (DigitalOcean).
+## Project layout (high level)
 
----
+- cmd/api — API server entrypoint and routes
+- internal/data — models and DB interaction
+- internal/validator — validation helpers
+- migrations/ — SQL migration files (if present)
+- README.md — this file
 
-## 📚 Purpose of This Repository
+## Prerequisites
 
-This repo is not just the final code — it documents my learning journey:
+- Go (install from https://go.dev)
+- PostgreSQL
+- psql CLI (optional but useful)
 
-- Every step will be committed with meaningful messages.
-- I will write short notes or comments as I learn new techniques.
-- The goal is to demonstrate **growth and understanding**, not just the end result.
+## Environment / configuration
 
----
+The server reads a DSN and a port from environment variables (adjust names if your code uses others). Example DSN format:
 
-## 🛠️ Tech Stack
+export DB_DSN="postgres://user:password@localhost/greenlight?sslmode=disable"
+export PORT=4000
 
-- **Language:** Go
-- **Database:** PostgreSQL
-- **Auth:** Token-based authentication (JWT-like)
-- **Deployment target:** Linux VM on DigitalOcean
+Set any other env vars your code expects (DB pool sizes, timeouts, etc.).
 
----
+## Database setup (example)
 
-## ⚙️ Running the Project Locally
+Replace user/password/database names to match your environment.
 
-### 2. Start PostgreSQL Locally
+1. Create database and user (example):
 
-You must have **PostgreSQL installed** on your machine.
+   1. Start psql as a superuser:
+      psql -U postgres
+   2. Create DB and user:
+      CREATE DATABASE greenlight;
+      CREATE USER greenlight_user WITH PASSWORD 'yourpassword';
+      GRANT ALL PRIVILEGES ON DATABASE greenlight TO greenlight_user;
+   3. Exit psql.
 
-#### **Create the database:**
+2. Run migrations:
+   - If you have SQL migration files in a `migrations/` folder, apply them with your preferred tool (psql, goose, migrate, or a included migrations binary).
+   - Example (simple, applying SQL files manually):
+     psql "$DB_DSN" -f ./migrations/0001_init.sql
 
-```bash
-createdb greenlight
+Make sure your `DB_DSN` points to the created DB and user.
 
-## Run the migrations:
-migrate -path ./migrations -database "postgres://localhost/greenlight?sslmode=disable" up
+## Build & run
 
-## Export ENV variables
-export GREENLIGHT_DB_DSN="postgres://YOURUSER@localhost/greenlight?sslmode=disable"
-export GREENLIGHT_PORT=4000
+From project root:
 
-### run the API
-    - go run ./cmd/api/
+1. Download deps:
+   go mod download
 
-### TEST Request
+2. Run directly:
+   PORT=4000 DB_DSN="postgres://user:pass@localhost/greenlight?sslmode=disable" go run ./cmd/api
 
- BODY='{"title":"Deadpool","year":2016,"runtime":"108 mins","genres":["action","comedy"]}'
+3. Or build binary:
+   go build -o bin/api ./cmd/api
+   PORT=4000 DB_DSN="postgres://user:pass@localhost/greenlight?sslmode=disable" ./bin/api
 
-curl -d "$BODY" \
-     -H "Content-Type: application/json" \
-     localhost:4000/v1/movies
+Server listens on the port you set (default seen in examples: 4000).
 
-```
+## API Endpoints
 
-## 👤 Author
+Base path: /v1
 
-Learning and built by **Hama Issoufou**
+- Healthcheck
+
+  - GET /v1/healthcheck
+  - Example:
+    curl -i http://localhost:4000/v1/healthcheck
+
+- Movies
+
+  - GET /v1/movies
+
+    - List movies (supports filters via query string — check code for supported params).
+    - Example:
+      curl -i "http://localhost:4000/v1/movies"
+
+  - POST /v1/movies
+
+    - Create a movie (JSON body).
+    - Example:
+      curl -i -X POST -H "Content-Type: application/json" \
+       -d '{"title":"Moana","year":2016,"runtime":"107 mins","genres":["animation","adventure"]}' \
+       http://localhost:4000/v1/movies
+
+  - GET /v1/movies/:id
+
+    - Retrieve single movie by ID.
+    - Example:
+      curl -i http://localhost:4000/v1/movies/1
+
+  - PATCH /v1/movies/:id
+
+    - Partial update. Send only the fields to update. Must send `Content-Type: application/json`.
+    - Example (update year):
+      curl -i -X PATCH -H "Content-Type: application/json" \
+       -d '{"year":1985}' \
+       http://localhost:4000/v1/movies/1
+    - Note: do not call the JSON body twice — ensure your handler only decodes the request once.
+
+  - DELETE /v1/movies/:id
+    - Delete movie by ID.
+    - Example:
+      curl -i -X DELETE http://localhost:4000/v1/movies/1
+
+- Users
+  - POST /v1/users
+    - Register a new user (see your user struct for required fields).
+    - Example:
+      curl -i -X POST -H "Content-Type: application/json" \
+       -d '{"name":"Alice","email":"alice@example.com","password":"secret"}' \
+       http://localhost:4000/v1/users
+
+## JSON shape (movies)
+
+Request body for creating a movie:
+{
+"title": "string",
+"year": 2020,
+"runtime": "120 mins",
+"genres": ["genre1","genre2"]
+}
+
+For PATCH, use pointer fields (handled by your handler) — only include fields you want to update.
+
+## Common troubleshooting
+
+- "body must not be empty" when PATCHing:
+
+  - Make sure to send `Content-Type: application/json` with curl (`-H "Content-Type: application/json"`).
+  - Ensure your handler only calls the JSON decoding helper once — decoding twice will fail because the body stream is consumed.
+
+- DB connection errors:
+  - Confirm `DB_DSN` is correct and DB is reachable.
+  - Ensure migrations were applied.
+
+## Testing
+
+Run unit tests:
+go test ./...
+
+If you have test DB setup required, configure environment variables for tests accordingly.
+
+## Linting & formatting
+
+- gofmt and go vet:
+  go vet ./...
+  gofmt -w .
+
+## Contributing
+
+- Open issues or PRs.
+- Ensure code builds and tests pass before submitting PRs.
+
+## License
+
+Add your preferred license (MIT/Apache/etc.) or remove this section.
 
 ---
