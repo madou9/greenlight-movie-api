@@ -16,6 +16,7 @@ var (
 
 type Models struct {
 	Movies MovieModel
+	Users  UserModel
 }
 
 // For ease of use, we also add a New() method which returns a Models struct containing
@@ -23,5 +24,6 @@ type Models struct {
 func NewModel(db *sql.DB) Models {
 	return Models{
 		Movies: MovieModel{DB: db},
+		Users: UserModel{DB: db}, // Initialize a new UserModel instance.
 	}
 }
