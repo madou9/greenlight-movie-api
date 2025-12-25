@@ -166,13 +166,4 @@ If you have test DB setup required, configure environment variables for tests ac
   go vet ./...
   gofmt -w .
 
-## Contributing
-
-- Open issues or PRs.
-- Ensure code builds and tests pass before submitting PRs.
-
-## License
-
-Add your preferred license (MIT/Apache/etc.) or remove this section.
-
 ---
