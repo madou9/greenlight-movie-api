@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greenlight-deployment
+  labels:
+    app: greenlight
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greenlight
+  template:
+    metadata:
+      labels:
+        app: greenlight
+    spec:
+      containers:
+        - name: greenlight
+          image: madgang5/greenlight:1.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4000
+          # inject all keys from the secret as env vars
+          envFrom:
+            - secretRef:
+                name: postgresql-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: greenlight-service
+spec:
+  selector:
+    app: greenlight
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: 4000
