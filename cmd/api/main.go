@@ -55,9 +55,8 @@ type application struct {
 }
 func main() {
 	   // Load .env file
-    err := godotenv.Load()
-    if err != nil {
-        log.Fatal("Error loading .env file")
+    if err := godotenv.Load(); err != nil {
+       log.Printf("No .env file found, continuing: %v", err)
     }
 	// Declarre an instance of the config struct
 	var cfg config
